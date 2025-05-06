@@ -1,0 +1,7 @@
+type SurveyProps = 
+{
+    
+}
+const Survey = () =>  {
+
+}
