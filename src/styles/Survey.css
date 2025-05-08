@@ -1,0 +1,63 @@
+ .survey-navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #2c3e50;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 100;
+    opacity: 0.9;
+  }
+  
+  .survey-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .modal-content {
+    background-color: white;
+  }
+  
+  .modal-content label {
+    color: black;
+  }
+  
+  .add-question-btn {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .add-question-btn:hover {
+    background-color: #2980b9;
+  }
+  
+  .question-container {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 4px;
+  }
+  
+  .button-group-container{
+    margin-top: 1rem;
+  }
+
+  .question-card:hover {
+    background-color: hsl(207, 14%, 87%);
+  }
+
+  .question-card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #eee;
+  }
+

@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^9.25.0",
+    "@typescript-eslint/parser": "^9.25.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
