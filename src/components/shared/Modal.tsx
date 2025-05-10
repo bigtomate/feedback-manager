@@ -8,7 +8,7 @@ import '../../styles/Survey.css';
 import '../../styles/QuestionForm.css';
 import Answer from '../../components/answer/answer-item/Answer';
 
-const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClose, ...props }) => {
+const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...props }) => {
 
   const [type, setType] = useState<QuestionType>("single_choice");
   const [questionTitle, setQuestionTitle] = useState('');
@@ -95,6 +95,13 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClos
     return calculatedSubAnswerId;
   }
 
+  const handleClose = () => {
+    setQuestionTitle(''),
+    setType("single_choice"),
+    setError(''),
+    showQuestionModal(false, true)
+  }
+
 
   if (!isOpen) return null;
   return (
@@ -102,10 +109,7 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClos
       <div className="modal-content">
         <div className="modal-body">
           <button className="modal-close" onClick={() => {
-            setQuestionTitle(''),
-              setType("single_choice"),
-              setError(''),
-              onClose()
+             handleClose()
           }}>X</button>
           <div>
             <div className="edit-container">
@@ -137,7 +141,7 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClos
                 {questionToEdit && questionTypeMap[type] === questionTypeMap['matrix'] && <h4>Answer</h4>}
 
                 {questionToEdit?.answers.map((answer, index) => (
-                  <Answer rowIndex={index} questionType={questionTypeMap[type]} key={answer.id} {...answer} />
+                  <Answer rowIndex={index} questionType = {type} key={answer.id} {...answer} />
                 ))}
               </div>
               {questionToEdit?.answers.length === 0 && questionTypeMap[type] === questionTypeMap['matrix'] &&

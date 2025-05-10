@@ -1,13 +1,12 @@
 import React from "react";
-import { Answer as AnswerModel } from "../../../models/Answer";
+import { Answer as AnswerModel, AnswerProps } from "../../../models/Answer";
 import { questionTypeMap } from "../../../models/Question";
 
-const Answer: React.FC<AnswerModel> = ({ questionType, rowIndex, ...props }) => {
-    const isTextInput = questionType === questionTypeMap.text_input;
-    const isRadio = questionType === questionTypeMap.single_choice;
-    const isMatrix = questionType === questionTypeMap.matrix;
-    const isFirstRow = rowIndex === 0;
-
+const Answer: React.FC<AnswerProps> = ({ ...props }) => {
+    const isTextInput = questionTypeMap[props.questionType] === questionTypeMap.text_input;
+    const isRadio = questionTypeMap[props.questionType] === questionTypeMap.single_choice;
+    const isMatrix = questionTypeMap[props.questionType] === questionTypeMap.matrix;
+    const isFirstRow = props.rowIndex === 0;
 
     // Calculate column widths based on subanswer content (for other columns)
     const columnWidths = isMatrix && props.subanswers?.map(subAnswer => {
@@ -74,7 +73,7 @@ const Answer: React.FC<AnswerModel> = ({ questionType, rowIndex, ...props }) => 
                                 <span>{subAnswer.id} </span>
                                    <input 
                                        type="radio" 
-                                       name={`matrix-${rowIndex}`} 
+                                       name={`matrix-${props.rowIndex}`} 
                                        value={subAnswer.id} 
                                        className="matrix-radio"
                                        style={{ margin: 0 }}

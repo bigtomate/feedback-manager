@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Survey as SurveyModel} from "../../models/Survey"
+import { Survey as SurveyModel, SurveyProps} from "../../models/Survey"
 import  Question  from '../../components/question/Question';
 import Modal from '../shared/Modal';
 import '../../styles/Survey.css';
 import '../../styles/QuestionForm.css';
-const Survey: React.FC<SurveyModel> = ({showQuestionModal, onSaveQuestion, onSaveAnswer, ...props}) =>  {
+
+const Survey: React.FC<SurveyProps> = ({showQuestionModal, onSaveQuestion, onSaveAnswer, ...props}) =>  {
   return (
     <>
       <div className="survey-container">
@@ -19,11 +20,9 @@ const Survey: React.FC<SurveyModel> = ({showQuestionModal, onSaveQuestion, onSav
   
     <Modal
         isOpen={props.addOrEditQuestion} 
-        onClose={() => {
-        showQuestionModal(false, true);
-    }}
-    onSaveAnswer = {onSaveAnswer}
-    onSaveQuestion={onSaveQuestion}
+        showQuestionModal = {showQuestionModal}
+        onSaveAnswer = {onSaveAnswer}
+        onSaveQuestion = {onSaveQuestion}
     {...props}
     >
      </Modal>
