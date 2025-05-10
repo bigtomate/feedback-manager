@@ -2,6 +2,6 @@ import { SubAnswer as SubAnswerModel} from "./SubAnswer";
 export interface Answer {
     questionId: number;
     id: number;
-    content:string;
+    content: string;
     subanswers: SubAnswerModel[];
 }

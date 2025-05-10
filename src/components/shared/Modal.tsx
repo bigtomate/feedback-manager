@@ -1,21 +1,21 @@
 
 import '../../styles/Modal.css';
 import React, { useState } from 'react';
-import { Survey as SurveyModel } from "../../models/Survey"
-import { Question as QuestionModel, QuestionType } from "../../models/Question"
+import { Question as QuestionModel, QuestionType, questionTypeMap } from "../../models/Question"
 import { Answer as AnswerModel } from "../../models/Answer"
+import { SubAnswer as SubAnswerModel } from "../../models/SubAnswer"
 import '../../styles/Survey.css';
 import '../../styles/QuestionForm.css';
 import Answer from '../../components/answer/answer-item/Answer';
 
-const Modal = ({showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClose, ...props}) => {
+const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClose, ...props }) => {
 
   const [type, setType] = useState<QuestionType>("single_choice");
   const [questionTitle, setQuestionTitle] = useState('');
   const [error, setError] = useState('');
   const [answer, setAnswer] = useState<AnswerModel>({} as AnswerModel);
-
-  const questionToEdit = props.questions.find(q => q.id === props.editQuestionId);
+  const [subAnswer, setSubAnswer] = useState<SubAnswerModel>({} as SubAnswerModel);
+  const questionToEdit: QuestionModel = props.questions.find((q: QuestionModel) => q.id === props.editQuestionId);
 
   const handleSubmit = () => {
     if (!questionTitle.trim()) {
@@ -28,21 +28,73 @@ const Modal = ({showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClose
       id: props.editQuestionId != 0 ? props.editQuestionId : props.questions.length + 1,
       content: questionTitle,
       type: type,
-      answers: questionToEdit?.answers ? [...questionToEdit.answers, answer] : [],
+      answers: questionToEdit?.answers ? [...questionToEdit.answers] : [],
     };
     onSaveQuestion(updateQuestion)
   };
 
   const handleAddAnswer = () => {
-    let answerId = 0;
-    props.questions.forEach(q => answerId += q.answers.length);
-    if (questionToEdit) {
-      setQuestionTitle(questionToEdit.content);
-      setType(questionToEdit.type);
-      answer.id = answerId + questionToEdit.answers.length + 1;
-      onSaveAnswer(questionToEdit.id, answer)
+    if (!answer.content || !answer.content.trim()) {
+      if (questionTypeMap[type] !== questionTypeMap['text_input'])
+        return;
     }
+
+    let calculatedAnswerId = 0;
+    props.questions.forEach((q: QuestionModel) => calculatedAnswerId += q.answers.length);
+
+    if (questionToEdit) {
+      answer.id = calculatedAnswerId + 1;
+      questionToEdit.answers.push(answer);
+      answer.questionId = questionToEdit.id
+      if (questionTypeMap[questionToEdit.type] === questionTypeMap['matrix']) {
+        // if the first answer has more subanswers than the new answer, 
+        // add a new subanswer to this new answer (it happends when a subanswer has been added and then add an answer again)
+        // oterwise always initialize a empty subanswer array to the new answer for the matrix type question.
+        answer.subanswers = [];
+        if (questionToEdit.answers[0].subanswers?.length != 0) {
+          questionToEdit.answers[0].subanswers.forEach((subAnswer: SubAnswerModel) => {
+            answer.subanswers.push({
+              ...subAnswer,
+              id: generateSubAnswerId() + 1, // the subAnswer share exactly the same charastics with the first answer, except the id
+            })
+          });
+        }
+      }
+    }
+    onSaveAnswer(questionToEdit.id, answer)
+    setAnswer({} as AnswerModel)
   }
+
+  const handleAddSubAnswer = () => {
+    if (!subAnswer.content || !subAnswer.content.trim()) {
+      return;
+    }
+
+    // add to each answer a new subanswer
+    questionToEdit.answers.forEach(answerToUpdate => {
+      const newSubAnswer = {
+        ...subAnswer,
+        id: generateSubAnswerId() + 1,
+        answerId: answerToUpdate.id,
+      };
+
+      answerToUpdate.subanswers?.push(newSubAnswer);
+      onSaveAnswer(questionToEdit.id, answerToUpdate);
+    });
+
+    setSubAnswer({} as SubAnswerModel);
+  }
+
+  const generateSubAnswerId = () => {
+    let calculatedSubAnswerId = 0;
+    props.questions.forEach((q: QuestionModel) => {
+      q.answers.forEach((a: AnswerModel) => {
+        calculatedSubAnswerId += a.subanswers ? a.subanswers.length : 0;
+      });
+    });
+    return calculatedSubAnswerId;
+  }
+
 
   if (!isOpen) return null;
   return (
@@ -73,32 +125,49 @@ const Modal = ({showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, onClose
                 <select
                   className="form-select"
                   value={type}
-                  onChange={(e) => setType(e.target.value as "single_choice" | "multiple_choice" | "text_input" | "matrix")}
+                  onChange={(e) => setType(e.target.value as QuestionType)}
                 >
-                  <option value="single_choice">Single Choice</option>
-                  <option value="multiple_choice">Multiple Choice</option>
-                  <option value="text_input">Text Input</option>
-                  <option value="matrix">Matrix</option>
+                  {Object.entries(questionTypeMap).map(([key, value]) => (
+                    <option key={key} value={key}>{value}</option>
+                  ))}
                 </select>
               </div>
 
-<div className='answer-section'>
-  {questionToEdit && <h4>Answer</h4>}
-          {questionToEdit?.answers.map((answer) => (
-          <Answer key={answer.id} {...answer} />
-      ))}
-</div>
+              <div className='answer-section'>
+                {questionToEdit && questionTypeMap[type] === questionTypeMap['matrix'] && <h4>Answer</h4>}
+
+                {questionToEdit?.answers.map((answer, index) => (
+                  <Answer rowIndex={index} questionType={questionTypeMap[type]} key={answer.id} {...answer} />
+                ))}
+              </div>
+              {questionToEdit?.answers.length === 0 && questionTypeMap[type] === questionTypeMap['matrix'] &&
+                <div className="info-message">Please add answers first before adding subanswers</div>
+              }
               <div className='answer-input answer-edit-section'>
                 {props.editQuestionId != 0 && <>
                   <label htmlFor='textarea'>Answer: </label>
                   <textarea
-                    placeholder="Enter answer text"
+                    style={{ height: '40px', width: '20%', minHeight: '30px' }}
+                    placeholder={questionTypeMap[type] !== questionTypeMap['text_input'] ? "Enter answer text" : "Enter Textbox label (optional)"}
                     onChange={(e) => setAnswer({ ...answer, content: e.target.value })}
                   />
-                  <button 
+                  <button
                     onClick={handleAddAnswer}>
-                    Add
+                    {questionTypeMap[type] !== questionTypeMap['text_input'] ? "Add" : "Add Textbox"}
                   </button>
+                  {questionTypeMap[type] === questionTypeMap['matrix']
+                    && <>
+                      <textarea
+                        style={{ height: '40px', width: '20%', minHeight: '30px' }}
+                        placeholder="Enter sub answer text"
+                        onChange={(e) => setSubAnswer({ ...subAnswer, content: e.target.value })}
+                      />
+                      <button
+                        onClick={handleAddSubAnswer}
+                      >
+                        Add SubAnswer
+                      </button>
+                    </>}
                 </>
                 }
               </div>
