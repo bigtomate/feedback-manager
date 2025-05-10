@@ -9,7 +9,7 @@ const Answer: React.FC<AnswerProps> = ({...props }) => {
     const isRadio = questionTypeMap[props.questionType] === questionTypeMap.single_choice;
     const isMatrix = questionTypeMap[props.questionType] === questionTypeMap.matrix;
     const isFirstRow = props.rowIndex === 0;
-    const [editMode, setEditMode] = React.useState(props.editMode);
+  
 
     // Calculate column widths based on subanswer content (for other columns)
     const columnWidths = isMatrix && props.subanswers?.map(subAnswer => {
@@ -65,6 +65,7 @@ const Answer: React.FC<AnswerProps> = ({...props }) => {
                        </thead>
                    )}
                    <tbody>
+                       
                        <tr>
                            <td className="matrix-row-label">
                                {props.content}

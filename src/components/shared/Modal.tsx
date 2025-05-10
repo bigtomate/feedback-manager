@@ -9,6 +9,7 @@ import '../../styles/QuestionForm.css';
 import Answer from '../../components/answer/answer-item/Answer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...props }) => {
 
   const [type, setType] = useState<QuestionType>("single_choice");
@@ -30,7 +31,7 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
       surveyId: props.id,
       id: props.editQuestionId != 0 ? props.editQuestionId : props.questions.length + 1,
       content: questionTitle,
-      type: type,
+      type: questionToEdit?.type != null ? questionToEdit.type : type,
       answers: questionToEdit?.answers ? [...questionToEdit.answers] : [],
     };
     onSaveQuestion(updateQuestion)
@@ -54,10 +55,10 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
         answer.subanswers = [];
         if (questionToEdit.answers[0].subanswers?.length != 0) {
           questionToEdit.answers[0].subanswers.forEach((subAnswer: SubAnswerModel) => {
-             const caulculatedSubAnswerId = maxSubAnswerId();
+            const caulculatedSubAnswerId = maxSubAnswerId();
             answer.subanswers.push({
               ...subAnswer,
-              id:  caulculatedSubAnswerId + 1, // the subAnswer share exactly the same charastics with the first answer, except the id
+              id: caulculatedSubAnswerId + 1, // the subAnswer share exactly the same charastics with the first answer, except the id
             })
           });
         }
@@ -73,7 +74,6 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
     }
 
     // add to each answer a new subanswer
-    
     questionToEdit.answers.forEach(answerToUpdate => {
       const calculatedSubAnswerId = maxSubAnswerId();
       const newSubAnswer = {
@@ -96,9 +96,9 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
       showQuestionModal(false, true)
   }
 
-  const handleRemoveAnswer = (answerid : number) => {
+  const handleRemoveAnswer = (answerid: number) => {
     if (questionToEdit) {
-       questionToEdit.answers.filter(answer => answer.id !== answerid);
+      questionToEdit.answers.filter(answer => answer.id !== answerid);
       const updateQuestion: QuestionModel = {
         ...questionToEdit,
         answers: questionToEdit.answers.filter(answer => answer.id !== answerid),
@@ -115,22 +115,22 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
     onSaveAnswer(questionToEdit.id, answer)
     setAnswerEditMode(0)
   }
-  
+
   const setAnswerEditMode = (answerid: number) => {
     setEditAnswerId(prevId => prevId === answerid ? null : answerid);
   }
 
   function maxAnswerId(): number {
     let max = 0;
-    questions.forEach((q: QuestionModel) => q.answers.forEach((a: AnswerModel) => max = max < a.id? a.id : max));
+    questions.forEach((q: QuestionModel) => q.answers.forEach((a: AnswerModel) => max = max < a.id ? a.id : max));
     return max;
-}
+  }
 
-function maxSubAnswerId(): number {
-  let max = 0;
-  questions.forEach((q: QuestionModel) => q.answers.forEach((a: AnswerModel) => a.subanswers?.forEach((sa: SubAnswerModel) => max = max < sa.id? sa.id : max)));
-  return max;
-}
+  function maxSubAnswerId(): number {
+    let max = 0;
+    questions.forEach((q: QuestionModel) => q.answers.forEach((a: AnswerModel) => a.subanswers?.forEach((sa: SubAnswerModel) => max = max < sa.id ? sa.id : max)));
+    return max;
+  }
 
   if (!isOpen) return null;
   return (
@@ -142,14 +142,20 @@ function maxSubAnswerId(): number {
           }}>X</button>
           <div>
             <div className="edit-container">
-              <h3>Create New Question</h3>
+              {questionToEdit?.id? (<h4>Edit Question</h4>):(<h4>Create new Question</h4>)}
               <div className="question-section">
                 <p>Question:</p>
                 <textarea
                   className='question-textarea'
                   placeholder="Enter question"
-                  value={questionTitle}
-                  onChange={(e) => setQuestionTitle(e.target.value)}
+                  value={questionToEdit?.content != null ? questionToEdit.content : questionTitle}
+                  onChange={(e) => {
+                    if (questionToEdit) {
+                      const updatedQuestion = { ...questionToEdit, content: e.target.value };
+                      onSaveQuestion(updatedQuestion);
+                    }
+                    setQuestionTitle(e.target.value);
+                  }}
                 />
                 {error && <div className="error-message">{error}</div>}
               </div>
@@ -157,45 +163,63 @@ function maxSubAnswerId(): number {
                 <p>Type:</p>
                 <select
                   className="form-select"
-                  value={type}
-                  onChange={(e) => setType(e.target.value as QuestionType)}
+                  value={questionToEdit?.type != null ? questionToEdit.type : type}
+                  onChange={(e) => {
+                    if (questionToEdit) {
+                      // if the question type is changed from matrix to other types, remove all the subanswers
+                      if (questionTypeMap[questionToEdit.type] === questionTypeMap['matrix']) {
+                        const updatedQuestion = { ...questionToEdit, answers:[], type: e.target.value};
+                        onSaveQuestion(updatedQuestion);
+                      } else if (questionTypeMap[e.target.value] === questionTypeMap['matrix']) {
+                        const updatedQuestion = {...questionToEdit, answers:[], type: e.target.value};
+                        onSaveQuestion(updatedQuestion);
+                      }
+                      else {
+                        const updatedQuestion = {...questionToEdit, type: e.target.value };
+                        onSaveQuestion(updatedQuestion);
+                      }
+                    }
+                    setType(e.target.value as QuestionType)
+                  }
+                  }
                 >
                   {Object.entries(questionTypeMap).map(([key, value]) => (
                     <option key={key} value={key}>{value}</option>
                   ))}
-                </select>
-              </div>
+                </select> 
+             {questionToEdit?.answers.length !== 0 && <> <span><WarningAmberIcon /></span><div className='info-message'> Changing the question type either from matrix to another type or from another type to matrix will remove the answers.</div>
+              </>}
+               </div>
 
               <div className='answer-section'>
-                {questionToEdit && questionTypeMap[type] === questionTypeMap['matrix'] && <h4>Answer</h4>}
+                {questionToEdit && <h4>Answer</h4>}
 
                 {questionToEdit?.answers.map((answer, index) => (
-                    <div key= {answer.id} style={{ display: 'flex', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', marginRight: '10px' }}>
+                  <div key={answer.id} style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', marginRight: '10px' }}>
                       <DeleteIcon
-                    className='icon-button'
-                    onClick={() => {
-                      handleRemoveAnswer(answer.id);
-                    } } />
-                    <ModeEditIcon className='icon-button' onClick={()=>{
-                     setAnswerEditMode(answer.id);
-                    }}/>
+                        className='icon-button'
+                        onClick={() => {
+                          handleRemoveAnswer(answer.id);
+                        }} />
+                      <ModeEditIcon className='icon-button' onClick={() => {
+                        setAnswerEditMode(answer.id);
+                      }} />
                     </div>
-                   
-                    {editAnswerId !== answer.id? (<div className="answer-edit-container" style={{ flex: 1 }}>
-                    <Answer rowIndex={index} questionType={type}  {...answer}/>
-                    </div>):
-                    (<div className="answer-edit-container answer-input" style={{ flex: 1 }}>
-                        <textarea defaultValue={answer.content}
-                         onChange={(e) => setAnswer({ ...answer, content: e.target.value })}
-                        />
-        
-                        <button className='answer-edit-save' onClick={() => {
-                          handleUpdateAnswer(answer)
-                        }}>save</button></div>)}
-                    </div> 
 
-                    
+                    {editAnswerId !== answer.id ? (<div className="answer-edit-container" style={{ flex: 1 }}>
+                      <Answer rowIndex={index} questionType={questionToEdit?.type != null ? questionToEdit.type : type}  {...answer} />
+                    </div>) :
+                      (<div className="answer-edit-container answer-input" style={{ flex: 1 }}>
+                        <textarea defaultValue={answer.content}
+                          onChange={(e) => setAnswer({ ...answer, content: e.target.value })}
+                        />
+
+                        <button className='answer-edit-save' onClick={
+                          handleUpdateAnswer}>save</button></div>)}
+                  </div>
+
+
                 ))}
               </div>
               {questionToEdit?.answers.length === 0 && questionTypeMap[type] === questionTypeMap['matrix'] &&

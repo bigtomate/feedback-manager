@@ -1,13 +1,11 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import './App.css'
 import React from 'react';
-import ReactDOM from 'react-dom/client';
 import Survey from './components/survery/Survey';
 import NavBar from './components/NavBar';
 import { Survey as SurveyModel } from './models/Survey';
 import { Question as QuestionModel, QuestionType} from './models/Question';
 import { Answer as AnswerModel} from './models/Answer';
-import Question from './components/question/Question';
 export default function App() {
 
   const [survey, setSurvey] = useState<SurveyModel>({
@@ -37,12 +35,12 @@ export default function App() {
     addOrEditQuestion: false
   } as SurveyModel)
 
-  const handleShowQuestionModal = (show: boolean, resetEditQuestionId: boolean) => {
+  const handleShowQuestionModal = (show: boolean, resetEditQuestionId: boolean, _editQuestionId: number) => {
     setSurvey((survey) => {
       return {
         ...survey,
         addOrEditQuestion: show,
-        editQuestionId: resetEditQuestionId? 0: survey.editQuestionId
+        editQuestionId: resetEditQuestionId? 0: _editQuestionId? _editQuestionId : survey.editQuestionId
       }
     }) 
   }

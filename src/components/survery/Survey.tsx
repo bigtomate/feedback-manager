@@ -13,7 +13,7 @@ const Survey: React.FC<SurveyProps> = ({showQuestionModal, onSaveQuestion, onSav
         <p className="survey-description">{props.description}</p>
         <div className="questions-container">
         {props.questions.map((question) => (
-        <Question key={question.id} {...question} />
+        <Question key={question.id} showQuestionModal = {showQuestionModal}  {...question} />
       ))}
       </div>
       </div>

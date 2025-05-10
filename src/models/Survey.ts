@@ -10,7 +10,7 @@ export interface Survey {
 }
 
 export interface SurveyProps extends Survey {
-    showQuestionModal: (show: boolean, resetEditQuestionId: boolean) => void;
+    showQuestionModal: (show: boolean, resetEditQuestionId: boolean, editQuestionId: number) => void;
     onSaveQuestion: (question: QuestionModel) => void;
     onSaveAnswer: (questionId: number, answer: AnswerModel) => void;
 }

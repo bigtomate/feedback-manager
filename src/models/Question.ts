@@ -13,4 +13,5 @@ export interface Question {
 
 export interface QuestionProps extends Question {
   rowIndex?: number;
+  showQuestionModal: (show: boolean, resetEditQuestionId: boolean, editQuestionId: number) => void;
 }
