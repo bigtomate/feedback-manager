@@ -1,12 +1,15 @@
 import React from "react";
 import { Answer as AnswerModel, AnswerProps } from "../../../models/Answer";
 import { questionTypeMap } from "../../../models/Question";
+import { PropaneSharp } from "@mui/icons-material";
 
-const Answer: React.FC<AnswerProps> = ({ ...props }) => {
+
+const Answer: React.FC<AnswerProps> = ({...props }) => {
     const isTextInput = questionTypeMap[props.questionType] === questionTypeMap.text_input;
     const isRadio = questionTypeMap[props.questionType] === questionTypeMap.single_choice;
     const isMatrix = questionTypeMap[props.questionType] === questionTypeMap.matrix;
     const isFirstRow = props.rowIndex === 0;
+    const [editMode, setEditMode] = React.useState(props.editMode);
 
     // Calculate column widths based on subanswer content (for other columns)
     const columnWidths = isMatrix && props.subanswers?.map(subAnswer => {
@@ -18,14 +21,16 @@ const Answer: React.FC<AnswerProps> = ({ ...props }) => {
         <>
         <div className="answer-container">
             {!isTextInput && !isMatrix && (
-                <div className="option-container">
+                <div className="option-container" key={props.id}>
+                   {props.id}
                     <input 
                         type={isRadio ? "radio" : "checkbox"} 
                         id={`option-${props.id}`}
                         name={isRadio ? "radio-group" : `checkbox-group-${props.id}`}
                         value={props.id} 
                     />
-                    <label htmlFor={`option-${props.id}`}>{props.content}</label>
+
+                   <label htmlFor={`option-${props.id}`}>{props.content}</label>
                 </div>
             )}
 

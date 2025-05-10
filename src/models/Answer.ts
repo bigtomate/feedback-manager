@@ -5,6 +5,7 @@ export interface Answer {
     id: number;
     content: string;
     subanswers: SubAnswerModel[];
+    editMode: boolean;
 }
 
 export interface AnswerProps extends Answer {

@@ -73,3 +73,20 @@
 .action-buttons {
   margin-top: 40px;
 }
+
+.icon-button:hover {
+ color: #df8181;
+}
+
+.answer-edit-container {
+  height: 40px;
+}
+
+.answer-edit-save button {
+  padding: 8px 15px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
