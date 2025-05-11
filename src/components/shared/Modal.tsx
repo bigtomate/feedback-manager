@@ -10,6 +10,12 @@ import Answer from '../../components/answer/answer-item/Answer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+
 const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...props }) => {
 
   const [type, setType] = useState<QuestionType>("single_choice");
@@ -22,7 +28,7 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
   const questions: QuestionModel[] = props.questions;
 
   const handleSubmit = () => {
-    if (!questionTitle.trim()) {
+    if (!questionTitle.trim() && !questionToEdit?.content.trim()) {
       setError('Question is required');
       return;
     }
@@ -30,7 +36,7 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
     const updateQuestion: QuestionModel = {
       surveyId: props.id,
       id: props.editQuestionId != 0 ? props.editQuestionId : props.questions.length + 1,
-      content: questionTitle,
+      content: questionToEdit?.content.trim()? questionToEdit?.content.trim() : questionTitle,
       type: questionToEdit?.type != null ? questionToEdit.type : type,
       answers: questionToEdit?.answers ? [...questionToEdit.answers] : [],
     };
@@ -160,35 +166,45 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
                 {error && <div className="error-message">{error}</div>}
               </div>
               <div>
-                <p>Type:</p>
-                <select
-                  className="form-select"
-                  value={questionToEdit?.type != null ? questionToEdit.type : type}
-                  onChange={(e) => {
-                    if (questionToEdit) {
-                      // if the question type is changed from matrix to other types, remove all the subanswers
-                      if (questionTypeMap[questionToEdit.type] === questionTypeMap['matrix']) {
-                        const updatedQuestion = { ...questionToEdit, answers:[], type: e.target.value};
-                        onSaveQuestion(updatedQuestion);
-                      } else if (questionTypeMap[e.target.value] === questionTypeMap['matrix']) {
-                        const updatedQuestion = {...questionToEdit, answers:[], type: e.target.value};
-                        onSaveQuestion(updatedQuestion);
-                      }
-                      else {
-                        const updatedQuestion = {...questionToEdit, type: e.target.value };
-                        onSaveQuestion(updatedQuestion);
-                      }
-                    }
-                    setType(e.target.value as QuestionType)
-                  }
-                  }
-                >
-                  {Object.entries(questionTypeMap).map(([key, value]) => (
-                    <option key={key} value={key}>{value}</option>
+             
+                <Box sx={{ minWidth: 200, maxWidth: 200 }}>
+        <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">Type</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={questionToEdit?.type != null ? questionToEdit.type : type}
+          label="Type"
+          onChange={(e) => {
+            if (questionToEdit) {
+              // if the question type is changed from matrix to other types, remove all the subanswers
+              if (questionTypeMap[questionToEdit.type] === questionTypeMap['matrix']) {
+                const updatedQuestion = { ...questionToEdit, answers:[], type: e.target.value};
+                onSaveQuestion(updatedQuestion);
+              } else if (questionTypeMap[e.target.value] === questionTypeMap['matrix']) {
+                const updatedQuestion = {...questionToEdit, answers:[], type: e.target.value};
+                onSaveQuestion(updatedQuestion);
+              }
+              else {
+                const updatedQuestion = {...questionToEdit, type: e.target.value };
+                onSaveQuestion(updatedQuestion);
+              }
+            }
+            setType(e.target.value as QuestionType)
+          }
+          }
+        >
+           {Object.entries(questionTypeMap).map(([key, value]) => (
+                  <MenuItem key={key} value={key}>{value}</MenuItem>
+                    
                   ))}
-                </select> 
-             {questionToEdit?.answers.length !== 0 && <> <span><WarningAmberIcon /></span><div className='info-message'> Changing the question type either from matrix to another type or from another type to matrix will remove the answers.</div>
-              </>}
+         
+        </Select>
+      </FormControl>
+    </Box>
+             
+             {questionToEdit?.answers.length !== 0 && <div  style={{ margin: 5 }}> <span><WarningAmberIcon /></span><span className='info-message'> Changing the question type either from matrix to another type or from another type to matrix will remove the answers.</span>
+              </div>}
                </div>
 
               <div className='answer-section'>
@@ -237,7 +253,7 @@ const Modal = ({ showQuestionModal, onSaveQuestion, onSaveAnswer, isOpen, ...pro
                     onClick={handleAddAnswer}>
                     {questionTypeMap[type] !== questionTypeMap['text_input'] ? "Add" : "Add Textbox"}
                   </button>
-                  {questionTypeMap[type] === questionTypeMap['matrix']
+                  {(questionTypeMap[type] === questionTypeMap['matrix'] || questionTypeMap[questionToEdit?.type] === questionTypeMap['matrix'])
                     && <>
                       <textarea
                         style={{ height: '40px', width: '20%', minHeight: '30px' }}

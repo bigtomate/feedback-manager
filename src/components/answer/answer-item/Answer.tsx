@@ -1,7 +1,7 @@
 import React from "react";
 import { Answer as AnswerModel, AnswerProps } from "../../../models/Answer";
 import { questionTypeMap } from "../../../models/Question";
-import { PropaneSharp } from "@mui/icons-material";
+
 
 
 const Answer: React.FC<AnswerProps> = ({...props }) => {
@@ -22,7 +22,7 @@ const Answer: React.FC<AnswerProps> = ({...props }) => {
         <div className="answer-container">
             {!isTextInput && !isMatrix && (
                 <div className="option-container" key={props.id}>
-                   {props.id}
+                 {/*   {props.id} */}
                     <input 
                         type={isRadio ? "radio" : "checkbox"} 
                         id={`option-${props.id}`}
@@ -76,7 +76,7 @@ const Answer: React.FC<AnswerProps> = ({...props }) => {
                                    className="matrix-cell"
                                    style={{ width: columnWidths[index] }}
                                >
-                                <span>{subAnswer.id} </span>
+                                {/* <span>{subAnswer.id}</span> */}
                                    <input 
                                        type="radio" 
                                        name={`matrix-${props.rowIndex}`} 
