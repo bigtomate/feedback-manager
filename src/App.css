@@ -1,6 +1,7 @@
 #app {
   max-width: 100%;
   padding: 2rem;
+  margin-left: 2rem;
   width: 90%;
   position: fixed;
   top: 0;

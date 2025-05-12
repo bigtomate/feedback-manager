@@ -25,7 +25,7 @@
     width: 100%;
     height: calc(100vh - 150px);
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
   }
 
   .modal-content {
@@ -55,8 +55,10 @@
     padding: 1rem;
     border: 1px solid #eee;
     border-radius: 4px;
-    overflow-y: auto;
     max-height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100%;
   }
   
   .button-group-container{
@@ -78,6 +80,10 @@
   display: flex;
   align-items: center;
   margin: 8px 0;
+   max-height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
+    width: 100%;
 }
 
 .option-container input {
